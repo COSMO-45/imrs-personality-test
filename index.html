@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMRS 人格测试 - 滚动的天空玩家专属</title>
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --bg-color: #f7f9fc;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --btn-back: #b2bec3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            color: #636e72;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .question-card {
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: left;
+            transition: all 0.2s;
+            color: var(--text-color);
+        }
+
+        .option-btn:hover {
+            border-color: var(--secondary-color);
+            background-color: #f0fffe;
+            transform: translateX(5px);
+        }
+
+        /* 底部按钮容器 */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            height: 50px; /* 占位防止跳动 */
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background-color: var(--btn-back);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .back-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+            visibility: visible;
+        }
+
+        .back-btn:hover {
+            background-color: #636e72;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #dfe6e9;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .result-card {
+            display: none;
+            text-align: center;
+        }
+
+        /* 结果页图片样式 */
+        .result-image-container {
+            width: 100%;
+            max-width: 500px;
+            height: 500px;
+            margin: 0 auto 20px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .result-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* 副标题样式 */
+        .result-subtitle {
+            font-size: 1.6rem;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        /* 简介样式 - 分行处理 */
+        .result-desc-container {
+            text-align: left;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid var(--secondary-color);
+            color: #2d3436;
+        }
+
+        .quote-line {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: block;
+            font-style: italic;
+        }
+
+        .desc-line {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #636e72;
+            display: block;
+        }
+
+        .restart-btn {
+            padding: 15px 40px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .restart-btn:hover {
+            background-color: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .question-text { font-size: 1.1rem; }
+            .card { padding: 20px; }
+            .result-image-container { 
+                height: 350px; 
+                max-width: 100%;
+            }
+            .result-subtitle {
+                font-size: 1.4rem;
+            }
+            .quote-line {
+                font-size: 1.2rem;
+            }
+            .desc-line {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>IMRS 人格测试</h1>
+        <div class="subtitle">测测你是《滚动的天空》中的哪种玩家？</div>
+    </header>
+
+    <div id="quiz-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        <div id="questions-wrapper">
+            <!-- 问题将通过 JS 动态插入 -->
+        </div>
+        
+        <!-- 底部按钮区 -->
+        <div class="card-footer">
+            <button id="back-btn" class="back-btn" onclick="goBack()">← 返回上一题</button>
+            <!-- 右侧留空或放其他东西，目前不需要 -->
+        </div>
+    </div>
+
+    <div id="result-container" class="card result-card">
+        <!-- 图片容器 -->
+        <div class="result-image-container">
+            <img id="res-img" class="result-image" src="" alt="人格结果图">
+        </div>
+        
+        <!-- 副标题 -->
+        <div class="result-subtitle" id="res-subtitle"></div>
+        
+        <!-- 简介容器 (包含引用和描述) -->
+        <div class="result-desc-container">
+            <span class="quote-line" id="res-quote"></span>
+            <span class="desc-line" id="res-desc"></span>
+        </div>
+        
+        <button class="restart-btn" onclick="location.reload()">再测一次</button>
+    </div>
+</div>
+
+<script>
+    // 题目数据
+    const questions = [
+        // E/I
+        { q: "你在 RS 玩家社区里通常是：", options: [
+            { text: "活跃分子，经常发帖、回帖、分享自己的通关视频。", type: "E" },
+            { text: "深度潜水，只看不说话，偶尔默默点赞。", type: "I" },
+            { text: "看情况，有时活跃有时隐身。", type: "X" }
+        ]},
+        { q: "当你学会一个高难技巧，你会：", options: [
+            { text: "立刻录个视频发到群里，教大家怎么操作。", type: "E" },
+            { text: "自己偷着乐，继续练下一个技巧，不主动声张。", type: "I" },
+            { text: "如果有人问就教，不问就不说。", type: "X" }
+        ]},
+        { q: "打游戏时，你更喜欢：", options: [
+            { text: "和朋友一起玩，边吐槽边闯关。", type: "E" },
+            { text: "一个人安安静静地玩，不想被打扰。", type: "I" },
+            { text: "都可以，看心情。", type: "X" }
+        ]},
+        { q: "遇到一个非常冷门的 bug 或彩蛋，你会：", options: [
+            { text: "迫不及待地发帖分享，让大家都知道。", type: "E" },
+            { text: "当成自己的小秘密，谁也不告诉。", type: "I" },
+            { text: "只告诉最亲近的一两个朋友。", type: "X" }
+        ]},
+        { q: "官方举办玩家创作大赛（如关卡设计、同人图），你会：", options: [
+            { text: "积极投稿，享受被大家看到的感觉。", type: "E" },
+            { text: "不参加，自己私下画着玩就好。", type: "I" },
+            { text: "可能会参加，但不会太张扬。", type: "X" }
+        ]},
+        { q: "在游戏里卡关很久，你会：", options: [
+            { text: "去直播平台找大佬的实时教学，甚至刷弹幕互动求助。", type: "E" },
+            { text: "自己反复看录像、练手感，不依赖别人。", type: "I" },
+            { text: "先自己练，实在不行再去看教学。", type: "X" }
+        ]},
+        { q: "你觉得 RS 最吸引你的是：", options: [
+            { text: "与朋友一起挑战、讨论的社区氛围。", type: "E" },
+            { text: "独自一人沉浸在手速与音乐中的心流体验。", type: "I" },
+            { text: "两者都有。", type: "X" }
+        ]},
+        // S/N
+        { q: "面对一个从未打过的新关卡，你更关注：", options: [
+            { text: "每一个地板、跳板、障碍的具体位置。", type: "S" },
+            { text: "整体的节奏和音乐氛围。", type: "N" },
+            { text: "都会关注。", type: "X" }
+        ]},
+        { q: "你判断一个关卡“难不难”的主要依据是：", options: [
+            { text: "实际死过多少次，哪个地方容易撞。", type: "S" },
+            { text: "看别人打一遍，就能凭感觉估出难度。", type: "N" },
+            { text: "两者结合。", type: "X" }
+        ]},
+        { q: "你在练习“扑克三冠”这种公认最难的皇冠时：", options: [
+            { text: "一帧一帧看教程，精确记住每一步的操作时机。", type: "S" },
+            { text: "凭感觉和肌肉记忆去试，相信自己的反应。", type: "N" },
+            { text: "先记关键点，剩下的靠手感。", type: "X" }
+        ]},
+        { q: "对于游戏里的“假四星”（标星难度不符），你的看法是：", options: [
+            { text: "官方标几星就是几星，不信谣不传谣。", type: "S" },
+            { text: "凭自己体验判断，它明明就是六星难度。", type: "N" },
+            { text: "难度因人而异，不纠结。", type: "X" }
+        ]},
+        { q: "你更喜欢哪种类型的关卡？", options: [
+            { text: "路线清晰、逻辑明确，像科技、电迷。", type: "S" },
+            { text: "脑洞大开、特效华丽，像电·爱、时间。", type: "N" },
+            { text: "都喜欢。", type: "X" }
+        ]},
+        { q: "当你听到一段 RS 的 BGM（如云、霓虹），你脑中会：", options: [
+            { text: "立刻浮现出对应的地板颜色和障碍物位置。", type: "S" },
+            { text: "单纯享受旋律，不会联想具体游戏画面。", type: "N" },
+            { text: "有时候会，有时候不会。", type: "X" }
+        ]},
+        { q: "如果你来设计一个新关卡，你会先构思：", options: [
+            { text: "具体的路径、跳板位置、障碍物布局。", type: "S" },
+            { text: "主题、音乐风格、整体氛围。", type: "N" },
+            { text: "同时进行。", type: "X" }
+        ]},
+        // T/F
+        { q: "当你看到一个新人发帖说 8 比特太难了，我过不去，你会：", options: [
+            { text: "指出他技术需要提升，建议他先练基础关。", type: "T" },
+            { text: "安慰他，并发视频手把手教他怎么过 8 比特。", type: "F" },
+            { text: "看情况，如果他态度好就教，态度差就怼。", type: "X" }
+        ]},
+        { q: "你觉得开心这个皮肤应该：", options: [
+            { text: "又丑又搞笑！RS 的灵魂彩蛋，必须保留！", type: "F" },
+            { text: "又抽象又难看，变脸不带扣豆的，建议删除。", type: "T" },
+            { text: "无所谓，我不用这个皮肤。", type: "X" }
+        ]},
+        { q: "对于冒牌官方账号，你的态度是：", options: [
+            { text: "只要是假的就应该举报，维护社区秩序。", type: "T" },
+            { text: "只要不骗钱，当个乐子看也挺好。", type: "F" },
+            { text: "不主动参与，但看到过分行为会提醒别人。", type: "X" }
+        ]},
+        { q: "如果你的好友因为卡关而怒删游戏，你会：", options: [
+            { text: "觉得他心态不行，删就删吧，以后他自己会回来的。", type: "T" },
+            { text: "赶紧去安慰他，劝他重新下载，甚至帮他通关。", type: "F" },
+            { text: "先让他冷静几天，之后再问他还玩不玩吧。", type: "X" }
+        ]},
+        { q: "你认为 RS 官方最应该优先做的是：", options: [
+            { text: "优化游戏性能，修复 bug，平衡难度。", type: "T" },
+            { text: "多出好看的音乐和皮肤，让玩家开心。", type: "F" },
+            { text: "两者并重。", type: "X" }
+        ]},
+        { q: "面对游戏中随处可见的墩子（小方块障碍物），你的态度是？", options: [
+            { text: "墩子虽然又蠢又挡路，但它是 RS 的元老级演员，没有它关卡反而少了灵魂，必须给墩子加鸡腿！", type: "F" },
+            { text: "墩子设计太偷懒了，纯靠数量堆难度，建议换成移动墩子、旋转墩子或者飞天墩子！", type: "T" },
+            { text: "无感，绕就完了，从来没正眼看过它。", type: "X" }
+        ]},
+        { q: "你在社区里看到有人发调时间买电音关的教学，你会：", options: [
+            { text: "认为这是利用 bug，不道德，应该制止。", type: "T" },
+            { text: "觉得能玩到绝版内容很酷，自己也会试试。", type: "F" },
+            { text: "不评论，自己不会去试。", type: "X" }
+        ]},
+        { q: "你心中 RS 最强的玩家是：", options: [
+            { text: "能把所有路线背得滚瓜烂熟、零失误的人。", type: "T" },
+            { text: "心态永远乐观、快乐游戏、感染他人的人。", type: "F" },
+            { text: "技术又好又幽默的人。", type: "X" }
+        ]},
+        // J/P
+        { q: "你平时玩 RS 的习惯是：", options: [
+            { text: "有计划地每天打几关，争取全收集。", type: "J" },
+            { text: "想玩就玩，可能一口气打好久，也可能一周不碰。", type: "P" },
+            { text: "有一定计划但也会灵活调整。", type: "X" }
+        ]},
+        { q: "当你决定攻克一个高难关卡时，你会：", options: [
+            { text: "先制定练习计划：今天练前半段，明天练后半段，周末总通。", type: "J" },
+            { text: "随缘打，手感好了就多练，没手感就换别的玩。", type: "P" },
+            { text: "大概有个目标，但不会严格按计划。", type: "X" }
+        ]},
+        { q: "对于游戏里的奖励关，你通常：", options: [
+            { text: "必须先打通主线关才去碰奖励关，按顺序来。", type: "J" },
+            { text: "想打哪个打哪个，不按顺序。", type: "P" },
+            { text: "看心情，有时按顺序有时跳着打。", type: "X" }
+        ]},
+        { q: "你的 RS 游戏界面设置（如灵敏度、画质、音效比例）是：", options: [
+            { text: "调好一次后基本不变，很固定。", type: "J" },
+            { text: "经常根据手感或不同关卡临时调整。", type: "P" },
+            { text: "很少调，默认就行。", type: "X" }
+        ]},
+        { q: "当官方发布一个活动（如限时关卡、节日皮肤），你会：", options: [
+            { text: "立刻去完成，绝不拖延。", type: "J" },
+            { text: "拖到活动快结束才去做，甚至可能忘掉。", type: "P" },
+            { text: "有空就做，不刻意。", type: "X" }
+        ]},
+        { q: "你更欣赏哪种玩家风格？", options: [
+            { text: "把每个皇冠、每个钻石都收集齐的完美主义者。", type: "J" },
+            { text: "只要能通关就行，不追求全收集的随性玩家。", type: "P" },
+            { text: "看具体情况。", type: "X" }
+        ]},
+        { q: "你在练习一个难点击杀时（如斜角），你的方法是：", options: [
+            { text: "分解动作，先练走位再练点击，一步步来。", type: "J" },
+            { text: "直接整段试，错了重来，靠大量试错找感觉。", type: "P" },
+            { text: "结合两种方法。", type: "X" }
+        ]},
+        { q: "总体而言，你在 RS 中的游戏态度更接近：", options: [
+            { text: "有目标、有规划，享受征服与完成。", type: "J" },
+            { text: "随遇而安，享受过程与意外惊喜。", type: "P" },
+            { text: "介于两者之间。", type: "X" }
+        ]}
+    ];
+
+    // 结果映射表 - quote 字段提取自原来的 desc 第一部分
+    const resultsMap = {
+        "ENTJ": { subtitle: "掌控一切的 BOSS", quote: "无敌的林总化身。", desc: "你天生具有领导力，在 RS 社区中往往是组织者或大神，喜欢掌控全局，制定战略。", imgName: "PINK-P" },
+        "ESTJ": { subtitle: "掌控一切的 BOSS", quote: "无敌的林总化身。", desc: "你讲究效率和规则，是社区里的执行派大佬，说一不二。", imgName: "PINK-P" },
+        
+        "ISTJ": { subtitle: "无敌的背板仙人", quote: "这关路线我记得比我回家还熟。", desc: "你依赖记忆和经验，稳扎稳打，是那种绝对不会在同一个地方死两次的玩家。", imgName: "TOY" },
+        "ISFJ": { subtitle: "所有新玩家的白月光", quote: "温柔的照顾着所有的 RS 玩家。", desc: "你细心、包容，不仅是背板高手，更是社区里的温暖守护者。", imgName: "CLOU-D" },
+        
+        "ESTP": { subtitle: "基本功硬的底力超人", quote: "我真第一次玩这关，不知道啊，通关了。", desc: "你反应极快，靠纯粹的手感和本能操作，是实战派的王者。", imgName: "PIPE" },
+        "ESFP": { subtitle: "变脸不扣豆之人", quote: "我 有 开 心 病。", desc: "你玩游戏就是为了快乐，情绪外露，是社区里的开心果，操作可能随性但充满激情。", imgName: "HAPY" },
+        
+        "ENTP": { subtitle: "如雨后春笋一般顽强出现的神秘组织", quote: "“我才是真正的滚动的天空官方。”", desc: "你脑洞清奇，喜欢整活，甚至可能开个假官号来逗大家玩。", imgName: "FAKE" },
+        "ENFP": { subtitle: "WOC！我是恐龙！", quote: "嗷嗷嗷嗷！！！嗷嗷！嗷嗷嗷！", desc: "你情绪充沛，充满活力（和噪音），玩游戏全靠一股热血和直觉。", imgName: "DINO" },
+        
+        "INTJ": { subtitle: "技巧全能大师", quote: "诶！我带你走一条小路！", desc: "你不仅技术高超，还能洞察关卡的本质，找到最优解，是大神中的大神。", imgName: "PRO" },
+        "INFJ": { subtitle: "神秘面具伪人", quote: "你知道 rs 有多少个面具吗？", desc: "你深邃神秘，知道很多不为人知的彩蛋和内幕，让人捉摸不透。", imgName: "MASK" },
+        
+        "INTP": { subtitle: "只是站在这里的保安", quote: "我只是保安，都与我无关。", desc: "你冷静旁观，逻辑自洽，对社区的纷争漠不关心，只活在自己的逻辑世界里。", imgName: "LOOK" },
+        "INFP": { subtitle: "深山中的武林大师", quote: "你要尝尝我的竹子吗？", desc: "你佛系、隐居，有自己的节奏，看似慢吞吞实则内力深厚。", imgName: "PAND-A" },
+        
+        "ENFJ": { subtitle: "自带 BGM 入场", quote: "不知道，我的身材很曼妙。", desc: "你享受展示自己，是社区的焦点，自带气场，喜欢感染他人。", imgName: "SEXY" },
+        "ESFJ": { subtitle: "行走的投诉", quote: "我我要要投诉你！！！", desc: "你极度在意秩序和他人感受（或者觉得被冒犯），喜欢通过外部手段维护正义。", imgName: "TOSU" },
+        
+        "ISTP": { subtitle: "一个墩子，纯挡路", quote: "叽里咕噜说啥呢，撞我你就重开吧。", desc: "你像墩子一样冷漠且致命，讲究物理法则，你菜你就要死，莫得感情。", imgName: "BLOC-K" },
+        "ISFP": { subtitle: "存在于时间线之外的神秘人", quote: "我电音关咋没了？", desc: "你活在自己的世界里，对版本变迁有独特的感性认知，神秘莫测。", imgName: "WALK" }
+    };
+
+    let currentQuestion = 0;
+    // 记录用户的答案，以便返回修改时恢复分数计算逻辑（简化版：返回时只回退索引，分数重新计算或动态调整）
+    // 为了简单起见，我们采用“重算”策略：每次渲染问题时，分数基于 userAnswers 数组重新计算
+    let userAnswers = new Array(questions.length).fill(null); 
+
+    function calculateScores() {
+        let scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+        for (let i = 0; i < currentQuestion; i++) {
+            if (userAnswers[i]) {
+                const type = userAnswers[i];
+                if (type !== 'X') {
+                    scores[type]++;
+                }
+            }
+        }
+        return scores;
+    }
+
+    function renderQuestion() {
+        const wrapper = document.getElementById('questions-wrapper');
+        const backBtn = document.getElementById('back-btn');
+        
+        if (!wrapper) return;
+        wrapper.innerHTML = '';
+        
+        // 控制返回按钮显示
+        if (currentQuestion > 0) {
+            backBtn.classList.add('visible');
+        } else {
+            backBtn.classList.remove('visible');
+        }
+
+        if (currentQuestion >= questions.length) {
+            showResult();
+            return;
+        }
+
+        const qData = questions[currentQuestion];
+        const card = document.createElement('div');
+        card.className = 'question-card active';
+        
+        const progress = ((currentQuestion) / questions.length) * 100;
+        const progressBar = document.getElementById('progress');
+        if (progressBar) {
+            progressBar.style.width = progress + '%';
+        }
+
+        let optionsHtml = '';
+        for (let i = 0; i < qData.options.length; i++) {
+            const opt = qData.options[i];
+            const label = String.fromCharCode(65 + i);
+            // 检查是否已经选过这个选项（用于返回时高亮，可选功能，这里暂不实现高亮，只负责跳转）
+            optionsHtml += '<button class="option-btn" onclick="handleAnswer(' + i + ')">' + label + '. ' + opt.text + '</button>';
+        }
+
+        card.innerHTML = '<div class="question-text">' + (currentQuestion + 1) + '. ' + qData.q + '</div><div class="options">' + optionsHtml + '</div>';
+        wrapper.appendChild(card);
+    }
+
+    window.handleAnswer = function(optionIndex) {
+        const qData = questions[currentQuestion];
+        const type = qData.options[optionIndex].type;
+        
+        // 保存答案
+        userAnswers[currentQuestion] = type;
+        
+        currentQuestion++;
+        renderQuestion();
+    };
+
+    window.goBack = function() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            // 不需要清除 userAnswers[currentQuestion]，这样如果用户再次选择，会覆盖旧值
+            // 如果用户只是想看看题目而不改，直接点下一题会覆盖
+            // 但如果用户想“取消选择”，目前的逻辑是必须选一个才能继续。
+            // 这里简单处理：回退一步，用户重新点击选项即可覆盖之前的选择。
+            renderQuestion();
+        }
+    };
+
+    function calculateMBTI() {
+        const scores = calculateScores();
+        let mbti = '';
+        mbti += (scores.E >= scores.I) ? 'E' : 'I';
+        mbti += (scores.S >= scores.N) ? 'S' : 'N';
+        mbti += (scores.T >= scores.F) ? 'T' : 'F';
+        mbti += (scores.J >= scores.P) ? 'J' : 'P';
+        return mbti;
+    }
+
+    function showResult() {
+        const quizContainer = document.getElementById('quiz-container');
+        const resultContainer = document.getElementById('result-container');
+        
+        if (quizContainer) quizContainer.style.display = 'none';
+        if (!resultContainer) return;
+        
+        resultContainer.style.display = 'block';
+        resultContainer.classList.add('active');
+
+        const mbti = calculateMBTI();
+        const result = resultsMap[mbti] || resultsMap['INTP']; 
+
+        const imgElement = document.getElementById('res-img');
+        const baseName = result.imgName;
+        
+        // 设置图片路径
+        imgElement.src = 'imrs/' + baseName + '.jpg'; 
+        
+        // 错误处理
+        imgElement.onerror = function() {
+            this.src = 'imrs/' + baseName + '.png';
+            this.onerror = function() {
+                this.src = 'imrs/' + baseName + '.jpeg';
+                this.onerror = function() {
+                    this.alt = '图片未找到！';
+                    this.src = ''; 
+                    this.style.display = 'none';
+                    const container = this.parentElement;
+                    if(container.querySelector('.img-error-msg') === null) {
+                        const msg = document.createElement('div');
+                        msg.className = 'img-error-msg';
+                        msg.style.color = '#ff6b6b';
+                        msg.style.padding = '20px';
+                        msg.innerText = '⚠️ 图片加载失败\n请将桌面的 imrs 文件夹复制到 G:\\龙虾记忆系统 目录下';
+                        container.appendChild(msg);
+                    }
+                };
+            };
+        };
+
+        // 设置副标题
+        document.getElementById('res-subtitle').innerText = result.subtitle;
+        
+        // 设置简介（分行 + 引用）
+        // quote 自动加引号如果原数据没有（为了统一风格，这里假设数据里可能有也可能没有，我们强制加上美观的引号）
+        // 注意：数据中有些已经有引号了，有些没有。为了统一，我们检查一下。
+        let quoteText = result.quote;
+        if (!quoteText.startsWith('"') && !quoteText.startsWith('"')) {
+             // 如果没有引号，加上
+             quoteText = '"' + quoteText + '"';
+        }
+        // 替换可能的中文引号重复问题，简单处理：直接显示
+        document.getElementById('res-quote').innerText = quoteText;
+        document.getElementById('res-desc').innerText = result.desc;
+        
+        resultContainer.style.animation = 'fadeIn 0.8s ease';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        renderQuestion();
+    });
+
+</script>
+
+</body>
+</html>
